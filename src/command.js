@@ -31,10 +31,8 @@ const Command = class {
     if (!this.hasErrors) { await this.validate() }
     if (!this.hasErrors) {
       if (this.constructor.useTransactionalExecute) {
-        console.log('tx')
         result = await config.transaction(() => this.execute())
       } else {
-        console.log('not tx')
         result = await this.execute()
       }
     }
@@ -44,6 +42,8 @@ const Command = class {
 
     return this.outcome
   }
+
+  async validate () {}
 
   get schema () { return this.constructor.schema }
 
