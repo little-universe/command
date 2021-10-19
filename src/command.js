@@ -1,4 +1,5 @@
 const { isEmpty, isBlank, reduce, map } = require('lodash')
+const doNotAllowMissingProperties = require('./doNotAllowMissingProperties')
 
 const Command = class {
   static useTransactionalExecute = false
@@ -9,7 +10,7 @@ const Command = class {
   #completed
 
   constructor (inputs) {
-    this.#inputs = inputs
+    this.#inputs = doNotAllowMissingProperties(inputs)
     this.#started = false
     this.#completed = false
     this.#outcome = new Outcome()
