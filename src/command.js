@@ -1,4 +1,4 @@
-const { isEmpty, isBlank, reduce, map } = require('lodash')
+const { isEmpty, isEqual, isObject, isArray, isString, reduce, map, isNull, isUndefined } = require('lodash')
 const doNotAllowMissingProperties = require('./doNotAllowMissingProperties')
 
 const Command = class {
@@ -94,10 +94,11 @@ const Command = class {
   }
 
   validateBlankInputs () {
-    for (const [inputName, inputValue] in Object.entries(this.inputs)) {
+    for (const inputName in this.inputs) {
       const inputSchema = this.schema[inputName]
 
       if (inputSchema) {
+        const inputValue = this.inputs[inputName]
         if (isBlank(inputValue) && !inputSchema.allowBlank) {
           this.addInputError(inputName, this.errorTypes.BLANK, inputName + ' is not allowed to be blank')
         }
@@ -232,6 +233,14 @@ const config = {
   transaction: (fn) => {
     throw new Error('You must set config.transaction with a transaction provider to use this feature')
   }
+}
+
+const isBlankString = (value) => isString(value) && !!value.match(/^\s*$/) // no \A or \z in JavaScript??
+const isEmptyArray = (value) => isArray(value) && isEmpty(value)
+const isEmptyObject = (value) => isObject(value) && isEmpty(value)
+
+const isBlank = (value) => {
+  return isNull(value) || isUndefined(value) || isBlankString(value) || isEmptyArray(value) || isEmptyObject(value)
 }
 
 module.exports = {
