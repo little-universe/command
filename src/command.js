@@ -1,18 +1,5 @@
-const { isEmpty, isEqual, isObject, isArray, isString, reduce, map, isNull, isUndefined } = require('lodash')
+const { isEmpty, isObject, isArray, isString, reduce, map, isNull, isUndefined } = require('lodash')
 const doNotAllowMissingProperties = require('./doNotAllowMissingProperties')
-
-const defaultOptions = { raiseIfNotSuccess: false }
-const extractOptions = (options) => {
-  if (options) {
-    if (!isEqual(Object.keys(options).sort(), Object.keys(defaultOptions).sort())) {
-      throw new Error('Invalid options: ' + JSON.stringify(options))
-    }
-  } else {
-    options = defaultOptions
-  }
-
-  return options
-}
 
 const Command = class {
   static useTransactionalExecute = false
@@ -29,14 +16,17 @@ const Command = class {
     this.#outcome = new Outcome()
   }
 
-  static run (rawInputs, options) {
+  static run (rawInputs) {
     const command = new this(rawInputs)
-    return command.run(options)
+    return command.run()
   }
 
-  async run (options) {
-    const { raiseIfNotSuccess } = extractOptions(options)
+  static runAndAssertSuccess (rawInputs) {
+    const command = new this(rawInputs)
+    return command.runAndAssertSuccess()
+  }
 
+  async run () {
     if (this.started) { throw new Error('Cannot run a command twice') }
 
     this.#started = true
@@ -56,17 +46,20 @@ const Command = class {
 
     this.#completed = true
 
-    if (raiseIfNotSuccess) {
-      if (this.outcome.success) {
-        return this.outcome.result
-      }
-      throw new Error(this.outcome.errorSentence)
-    }
-
     return this.outcome
   }
 
+  async runAndAssertSuccess () {
+    await this.run()
+
+    if (this.outcome.success) {
+      return this.outcome.result
+    }
+    throw new Error(this.outcome.errorSentence)
+  }
+
   async validate () {}
+
   transaction (fn) {
     return config.transaction(fn)
   }
