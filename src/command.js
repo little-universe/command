@@ -2,8 +2,6 @@ const { isEmpty, isObject, isArray, isString, reduce, map, isNull, isUndefined }
 const doNotAllowMissingProperties = require('./doNotAllowMissingProperties')
 
 const Command = class {
-  static useTransactionalExecute = false
-
   #inputs
   #outcome
   #started
@@ -35,13 +33,7 @@ const Command = class {
 
     if (!this.hasErrors) { this.validateInputs() }
     if (!this.hasErrors) { await this.validate() }
-    if (!this.hasErrors) {
-      if (this.constructor.useTransactionalExecute) {
-        result = await this.transaction(() => this.execute())
-      } else {
-        result = await this.execute()
-      }
-    }
+    if (!this.hasErrors) { result = await this.execute() }
     if (!this.hasErrors) { this.#outcome.setResult(result) }
 
     this.#completed = true
@@ -59,10 +51,6 @@ const Command = class {
   }
 
   async validate () {}
-
-  transaction (fn) {
-    return config.transaction(fn)
-  }
 
   get schema () { return this.constructor.schema }
 
@@ -247,12 +235,6 @@ const Outcome = class {
   }
 }
 
-const config = {
-  transaction: (fn) => {
-    throw new Error('You must set config.transaction with a transaction provider to use this feature')
-  }
-}
-
 const isBlankString = (value) => isString(value) && !!value.match(/^\s*$/) // no \A or \z in JavaScript??
 const isEmptyArray = (value) => isArray(value) && isEmpty(value)
 const isEmptyObject = (value) => isObject(value) && isEmpty(value)
@@ -262,6 +244,5 @@ const isBlank = (value) => {
 }
 
 module.exports = {
-  Command,
-  config
+  Command
 }
