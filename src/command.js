@@ -2,12 +2,14 @@ const { isEmpty, isObject, isArray, isString, reduce, map, isNull, isUndefined }
 const doNotAllowMissingProperties = require('./doNotAllowMissingProperties')
 
 const Command = class {
+  #rawInputs
   #inputs
   #outcome
   #started
   #completed
 
   constructor (inputs) {
+    this.#rawInputs = inputs
     this.#inputs = doNotAllowMissingProperties(inputs)
     this.#started = false
     this.#completed = false
@@ -32,6 +34,7 @@ const Command = class {
     let result = null
 
     if (!this.hasErrors) { this.validateInputs() }
+    this.applyDefaultInputs()
     if (!this.hasErrors) { await this.validate() }
     if (!this.hasErrors) { result = await this.execute() }
     if (!this.hasErrors) { this.#outcome.setResult(result) }
@@ -68,12 +71,13 @@ const Command = class {
     return this.#outcome.success
   }
 
-  // Methods deletgated to #outcome. Is there a helper to make this type of delegation less verbose?
-  // note: using #outcome and protecting the outcome getter so that an outcome is not accessible
-  //       by the caller without actually running the command.
+  get rawInputs () { return this.#rawInputs }
   get inputs () { return this.#inputs }
   get started () { return this.#started }
   get completed () { return this.#completed }
+  // Methods deletgated to #outcome. Is there a helper to make this type of delegation less verbose?
+  // note: using #outcome and protecting the outcome getter so that an outcome is not accessible
+  //       by the caller without actually running the command.
   get result () { return this.#outcome.result }
   get errors () { return this.#outcome.errors }
   get runtimeErrors () { return this.#outcome.runtimeErrors }
@@ -87,6 +91,7 @@ const Command = class {
     this.validateBlankInputs()
     this.validateRequiredInputs()
     this.validateEnums()
+    // TODO: implement validateTypes()
   }
 
   validateSupportedInputs () {
@@ -117,8 +122,20 @@ const Command = class {
       const inputSchema = this.schema[inputName]
       const required = inputSchema.required
 
-      if (required && !(inputName in this.inputs)) {
-        this.addInputError(inputName, this.errorTypes.MISSING, inputName + ' is missing')
+      if (!(inputName in this.inputs)) {
+        if (required) {
+          this.addInputError(inputName, this.errorTypes.MISSING, inputName + ' is missing')
+        }
+      }
+    }
+  }
+
+  applyDefaultInputs () {
+    for (const inputName in this.schema) {
+      const inputSchema = this.schema[inputName]
+
+      if (!(inputName in this.inputs)) {
+        this.inputs[inputName] = ('default' in inputSchema) ? inputSchema.default : undefined
       }
     }
   }
@@ -143,14 +160,30 @@ const Command = class {
     return this.#outcome.errorTypes
   }
 
-  runSubCommand (commandClass, inputs) {
-    const subCommand = commandClass.run(inputs)
+  async runSubCommand (CommandClass, inputs) {
+    const command = new CommandClass(inputs)
+    const outcome = await command.run()
 
-    if (!subCommand.success) {
-      this.copyErrors(subCommand)
+    if (!outcome.success) {
+      this.copyErrors(command)
     }
 
-    return subCommand
+    return outcome
+  }
+
+  copyErrors (subCommand) {
+    const subErrors = subCommand.outcome.errors
+    const subName = subCommand.constructor.name
+
+    for (const category in subErrors) {
+      const errorKeysAndMessages = subErrors[category]
+
+      errorKeysAndMessages.forEach((pair) => {
+        const key = subName + ':' + pair[0]
+        const message = pair[1]
+        this.addInputError(category, key, message)
+      })
+    }
   }
 }
 
