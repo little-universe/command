@@ -158,11 +158,11 @@ const Command = class {
       const inputSchema = this.schema[inputName]
       const type = inputSchema.type
 
-      if (type === 'enum') {
+      if (type === 'enum' && inputName in this.inputs) {
         const oneOf = Object.values(inputSchema.oneOf)
         const value = this.inputs[inputName]
 
-        if (!oneOf.includes(value)) {
+        if (value !== undefined && !oneOf.includes(value)) {
           this.addInputError(inputName, this.errorTypes.INVALID, value + ' received but must be one of ' + oneOf.join(', '))
         }
       }
