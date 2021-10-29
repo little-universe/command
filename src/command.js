@@ -1,6 +1,8 @@
 const { isEmpty, isObject, isArray, isString, reduce, map, isNull, isUndefined } = require('lodash')
 const doNotAllowMissingProperties = require('./doNotAllowMissingProperties')
 
+const HaltExecution = class extends Error {}
+
 const Command = class {
   #rawInputs
   #inputs
@@ -36,7 +38,15 @@ const Command = class {
     if (!this.hasErrors) { this.validateInputs() }
     this.applyDefaultInputs()
     if (!this.hasErrors) { await this.validate() }
-    if (!this.hasErrors) { result = await this.execute() }
+    if (!this.hasErrors) {
+      try {
+        result = await this.execute()
+      } catch (err) {
+        if (err.constructor !== HaltExecution) {
+          throw err
+        }
+      }
+    }
     if (!this.hasErrors) { this.#outcome.setResult(result) }
 
     this.#completed = true
@@ -84,7 +94,10 @@ const Command = class {
   get inputErrors () { return this.#outcome.inputErrors }
   get hasErrors () { return this.#outcome.hasErrors }
   addInputError (input, errorKey, message) { return this.#outcome.addInputError(input, errorKey, message) }
-  addRuntimeError (errorKey, message) { return this.#outcome.addRuntimeError(errorKey, message) }
+  addRuntimeError (errorKey, message) {
+    this.#outcome.addRuntimeError(errorKey, message)
+    throw new HaltExecution()
+  }
 
   validateInputs () {
     this.validateSupportedInputs()
