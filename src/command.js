@@ -222,14 +222,15 @@ const Outcome = class {
     return !this.hasErrors
   }
 
-  static errorTypes = {
-    NOT_FOUND: 'not found',
+  static errorTypes = doNotAllowMissingProperties({
+    NOT_FOUND: 'not_found',
     INVALID: 'invalid',
     MISSING: 'missing',
     BLANK: 'blank',
     UNSUPPORTED: 'unsupported',
-    RUNTIME: 'runtime'
-  }
+    RUNTIME: 'runtime',
+    TYPE_MISMATCH: 'type_mismatch'
+  })
 
   get errorTypes () {
     return Outcome.errorTypes
