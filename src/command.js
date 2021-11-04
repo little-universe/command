@@ -1,4 +1,4 @@
-const { isEmpty, isObject, isArray, isString, reduce, map, isNull, isUndefined } = require('lodash')
+const { isEmpty, isObject, isArray, isString, reduce, map, isNull, isUndefined, isNaN } = require('lodash')
 const doNotAllowMissingProperties = require('./doNotAllowMissingProperties')
 
 const HaltExecution = class extends Error {}
@@ -287,7 +287,7 @@ const isEmptyArray = (value) => isArray(value) && isEmpty(value)
 const isEmptyObject = (value) => isObject(value) && isEmpty(value)
 
 const isBlank = (value) => {
-  return isNull(value) || isUndefined(value) || isBlankString(value) || isEmptyArray(value) || isEmptyObject(value)
+  return isNull(value) || isUndefined(value) || isBlankString(value) || isEmptyArray(value) || isEmptyObject(value) || isNaN(value)
 }
 
 module.exports = {
