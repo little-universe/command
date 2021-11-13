@@ -1,37 +1,46 @@
-const { isEmpty, isObject, isArray, isString, reduce, map, isNull, isUndefined, isNaN } = require('lodash')
+const { isEmpty, isObject, isArray, isString, reduce, map, isNull, isUndefined, isNaN, cloneDeep } = require('lodash')
 const { doNotAllowMissingProperties, allowMissingProperties } = require('./doNotAllowMissingProperties')
 
 const HaltExecution = class extends Error {}
 
 const Command = class {
-  #rawInputs
-  #inputs
-  #outcome
-  #started
-  #completed
+  inputs
+  get success () { return this.outcome.success }
+  get result () { return this.outcome.result }
+  get errors () { return this.outcome.errors }
+  get schema () { return this.constructor.schema }
+
+  _rawInputs
+  _outcome
+  _started
+  _completed
 
   constructor (inputs) {
-    this.#rawInputs = inputs
-    this.#inputs = doNotAllowMissingProperties(inputs)
-    this.#started = false
-    this.#completed = false
-    this.#outcome = new Outcome()
+    this._rawInputs = inputs
+    this.inputs = doNotAllowMissingProperties(cloneDeep(inputs))
+    this._started = false
+    this._completed = false
+    this._outcome = Outcome.create()
+  }
+
+  static create (rawInputs) {
+    return doNotAllowMissingProperties(new this(rawInputs))
   }
 
   static run (rawInputs) {
-    const command = new this(rawInputs)
+    const command = this.create(rawInputs)
     return command.run()
   }
 
   static runAndAssertSuccess (rawInputs) {
-    const command = new this(rawInputs)
+    const command = this.create(rawInputs)
     return command.runAndAssertSuccess()
   }
 
   async run () {
-    if (this.started) { throw new Error('Cannot run a command twice') }
+    if (this._started) { throw new Error('Cannot run a command twice') }
 
-    this.#started = true
+    this._started = true
 
     let result = null
 
@@ -47,9 +56,9 @@ const Command = class {
         }
       }
     }
-    if (!this.hasErrors) { this.#outcome.setResult(result) }
+    if (!this.hasErrors) { this._outcome.setResult(result) }
 
-    this.#completed = true
+    this._completed = true
 
     return this.outcome
   }
@@ -65,37 +74,22 @@ const Command = class {
 
   async validate () {}
 
-  get schema () { return this.constructor.schema }
-
   get outcome () {
-    if (!this.completed) {
+    if (!this._completed) {
       throw new Error('Cannot access the outcome of a command that has not been run')
     }
-    return this.#outcome
+    return this._outcome
   }
 
-  get success () {
-    if (!this.completed) {
-      throw new Error('Cannot check the success status of a command that has not been run')
-    }
-    return this.#outcome.success
-  }
-
-  get rawInputs () { return this.#rawInputs }
-  get inputs () { return this.#inputs }
-  get started () { return this.#started }
-  get completed () { return this.#completed }
-  // Methods deletgated to #outcome. Is there a helper to make this type of delegation less verbose?
-  // note: using #outcome and protecting the outcome getter so that an outcome is not accessible
+  // Methods deletgated to _outcome. Is there a helper to make this type of delegation less verbose?
+  // note: using _outcome and protecting the outcome getter so that an outcome is not accessible
   //       by the caller without actually running the command.
-  get result () { return this.#outcome.result }
-  get errors () { return this.#outcome.errors }
-  get runtimeErrors () { return this.#outcome.runtimeErrors }
-  get inputErrors () { return this.#outcome.inputErrors }
-  get hasErrors () { return this.#outcome.hasErrors }
-  addInputError (input, errorKey, message) { return this.#outcome.addInputError(input, errorKey, message) }
+  get runtimeErrors () { return this.outcome.runtimeErrors }
+  get inputErrors () { return this.outcome.inputErrors }
+  get hasErrors () { return this._outcome.hasErrors }
+  addInputError (input, errorKey, message) { return this._outcome.addInputError(input, errorKey, message) }
   addRuntimeError (errorKey, message) {
-    this.#outcome.addRuntimeError(errorKey, message)
+    this._outcome.addRuntimeError(errorKey, message)
     throw new HaltExecution()
   }
 
@@ -170,7 +164,7 @@ const Command = class {
   }
 
   get errorTypes () {
-    return this.#outcome.errorTypes
+    return this._outcome.errorTypes
   }
 
   async runSubCommand (CommandClass, inputs) {
@@ -201,16 +195,20 @@ const Command = class {
 }
 
 const Outcome = class {
-  #result
-  #errors
+  _result
+  _errors
 
-  constructor () {
-    this.#result = null
-    this.#errors = {}
+  static create () {
+    return doNotAllowMissingProperties(new this())
   }
 
-  get result () { return this.#result }
-  get errors () { return this.#errors }
+  constructor () {
+    this._result = null
+    this._errors = {}
+  }
+
+  get result () { return this._result }
+  get errors () { return this._errors }
   get runtimeErrors () { return this.errors.runtime }
   get inputErrors () {
     const e = Object.assign({}, this.errors)
@@ -229,7 +227,8 @@ const Outcome = class {
     BLANK: 'blank',
     UNSUPPORTED: 'unsupported',
     RUNTIME: 'runtime',
-    TYPE_MISMATCH: 'type_mismatch'
+    TYPE_MISMATCH: 'type_mismatch',
+    UNKNOWN: 'unknown'
   })
 
   get errorTypes () {
@@ -253,7 +252,7 @@ const Outcome = class {
   }
 
   setResult (result) {
-    this.#result = result
+    this._result = result
   }
 
   get symbolicErrors () {
