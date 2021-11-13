@@ -1,7 +1,7 @@
 const { isEmpty, isObject, isArray, isString, reduce, map, isNull, isUndefined, isNaN, cloneDeep } = require('lodash')
 const { doNotAllowMissingProperties, allowMissingProperties } = require('./doNotAllowMissingProperties')
 
-const HaltExecution = class extends Error {}
+const HaltExecution = {}
 
 const Command = class {
   inputs
@@ -40,25 +40,22 @@ const Command = class {
   async run () {
     if (this._started) { throw new Error('Cannot run a command twice') }
 
-    this._started = true
+    try {
+      this._started = true
 
-    let result = null
-
-    if (!this.hasErrors) { this.validateInputs() }
-    this.applyDefaultInputs()
-    if (!this.hasErrors) { await this.validate() }
-    if (!this.hasErrors) {
-      try {
-        result = await this.execute()
-      } catch (err) {
-        if (err.constructor !== HaltExecution) {
-          throw err
-        }
+      this.validateInputs()
+      this.applyDefaultInputs()
+      await this._validate()
+      const result = await this.execute()
+      this.setResult(result)
+    } catch (err) {
+      if (err !== HaltExecution) {
+        this.addUnknownError(err.message)
+        throw err
       }
+    } finally {
+      this._completed = true
     }
-    if (!this.hasErrors) { this._outcome.setResult(result) }
-
-    this._completed = true
 
     return this.outcome
   }
@@ -72,7 +69,12 @@ const Command = class {
     throw new Error(this.outcome.errorSentence)
   }
 
-  async validate () {}
+  async _validate () {
+    await this.validate()
+    this.haltIfHasErrors()
+  }
+
+  async validate () { } // override for custom validation
 
   get outcome () {
     if (!this._completed) {
@@ -90,8 +92,11 @@ const Command = class {
   addInputError (input, errorKey, message) { return this._outcome.addInputError(input, errorKey, message) }
   addRuntimeError (errorKey, message) {
     this._outcome.addRuntimeError(errorKey, message)
-    throw new HaltExecution()
+    this.halt()
   }
+
+  addUnknownError (message) { return this._outcome.addUnknownError(message) }
+  setResult (result) { return this._outcome.setResult(result) }
 
   validateInputs () {
     this.validateSupportedInputs()
@@ -99,6 +104,8 @@ const Command = class {
     this.validateRequiredInputs()
     this.validateEnums()
     // TODO: implement validateTypes()
+
+    this.haltIfHasErrors()
   }
 
   validateSupportedInputs () {
@@ -173,6 +180,7 @@ const Command = class {
 
     if (!outcome.success) {
       this.copyErrors(command)
+      this.halt()
     }
 
     return outcome
@@ -191,6 +199,16 @@ const Command = class {
         this.addInputError(category, key, message)
       })
     }
+  }
+
+  haltIfHasErrors () {
+    if (this.hasErrors) {
+      this.halt()
+    }
+  }
+
+  halt () {
+    throw HaltExecution
   }
 }
 
@@ -249,6 +267,10 @@ const Outcome = class {
 
   addRuntimeError (errorKey, message) {
     this.addInputError(this.errorTypes.RUNTIME, errorKey, message)
+  }
+
+  addUnknownError (message) {
+    this.addInputError(this.errorTypes.RUNTIME, this.errorTypes.UNKNOWN, message)
   }
 
   setResult (result) {
