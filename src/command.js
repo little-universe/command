@@ -1,5 +1,5 @@
 const { isEmpty, isObject, isArray, isString, reduce, map, isNull, isUndefined, isNaN } = require('lodash')
-const doNotAllowMissingProperties = require('./doNotAllowMissingProperties')
+const { doNotAllowMissingProperties, allowMissingProperties } = require('./doNotAllowMissingProperties')
 
 const HaltExecution = class extends Error {}
 
@@ -148,7 +148,7 @@ const Command = class {
       const inputSchema = this.schema[inputName]
 
       if (!(inputName in this.inputs)) {
-        this.inputs[inputName] = ('default' in inputSchema) ? inputSchema.default : undefined
+        allowMissingProperties(this.inputs)[inputName] = ('default' in inputSchema) ? inputSchema.default : undefined
       }
     }
   }
