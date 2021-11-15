@@ -37,10 +37,6 @@ const Command = class {
     return command.runAndAssertSuccess()
   }
 
-  static create (rawInputs) {
-    return doNotAllowMissingProperties(new this(rawInputs))
-  }
-
   async run () {
     if (this._started) { throw new Error('Cannot run a command twice') }
 
