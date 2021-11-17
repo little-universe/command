@@ -174,13 +174,15 @@ const Command = class {
     return this._outcome.errorTypes
   }
 
-  async runSubCommand (CommandClass, inputs) {
+  async runSubCommand (CommandClass, inputs, haltOnError = true) {
     const command = new CommandClass(inputs)
     const outcome = await command.run()
 
     if (!outcome.success) {
       this.copyErrors(command)
-      this.halt()
+      if (haltOnError) {
+        this.halt()
+      }
     }
 
     return outcome
