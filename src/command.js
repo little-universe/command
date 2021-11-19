@@ -15,7 +15,7 @@ const Command = class {
   _started
   _completed
 
-  constructor (inputs) {
+  constructor (inputs = {}) {
     this._rawInputs = inputs
     this.inputs = doNotAllowMissingProperties(cloneDeep(inputs))
     this._started = false
