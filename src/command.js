@@ -197,8 +197,10 @@ const Command = class {
       const errorKeysAndMessages = subErrors[category]
 
       errorKeysAndMessages.forEach((pair) => {
-        const key = subName + ':' + pair[0]
+        const subKey = pair[0]
         const message = pair[1]
+
+        const key = subName + ':' + subKey
         this.addInputError(category, key, message)
       })
     }
@@ -302,7 +304,10 @@ const Outcome = class {
 
   get notFoundError () {
     const symbols = Object.values(this.symbolicErrors).flat()
-    return symbols.includes(this.errorTypes.NOT_FOUND)
+    // strip off any subcommand prefixes
+    const symbolSubKeys = map(symbols, (s) => s.replace(/^[^:]*:/, ''))
+
+    return symbolSubKeys.includes(this.errorTypes.NOT_FOUND)
   }
 }
 
