@@ -174,18 +174,19 @@ const Command = class {
     return this._outcome.errorTypes
   }
 
-  async runSubCommand (CommandClass, inputs, haltOnError = true) {
+  async runSubCommand (CommandClass, inputs, assertSuccess = true) {
     const command = new CommandClass(inputs)
     const outcome = await command.run()
 
     if (!outcome.success) {
       this.copyErrors(command)
-      if (haltOnError) {
+
+      if (assertSuccess) {
         this.halt()
       }
     }
 
-    return outcome
+    return assertSuccess ? outcome.result : outcome
   }
 
   copyErrors (subCommand) {
