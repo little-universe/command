@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@little-universe/do-not-allow-missing-properties": "^1.0.0",
     "lodash": "^4.17.21"
   },
   "name": "command",
