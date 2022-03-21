@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
+  "name": "command",
+  "version": "1.0.0",
+  "description": "Command pattern implementation for node",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/little-universe/command.git"
+  },
+  "author": "Miles Georgi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/little-universe/command/issues"
+  },
+  "homepage": "https://github.com/little-universe/command#readme"
+}
