@@ -1,9 +1,8 @@
 rm -rf ./node_modules
-npm ci
 touch .npmrc
 echo "//npm.pkg.github.com/:_authToken=$NPM_TOKEN
 @little-universe:registry=https://npm.pkg.github.com" > .npmrc
-npm install @little-universe/do-not-allow-missing-properties --registry=https://npm.pkg.github.com/
+npm ci
 rm .npmrc
 echo "End execution"
 
