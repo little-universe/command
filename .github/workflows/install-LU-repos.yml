@@ -10,7 +10,7 @@ on: push
 # They can also be in parallel
 jobs:
   job1:
-    name: Jest Testing
+    name: Install Little Universe's Repos
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -18,4 +18,4 @@ jobs:
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     - run: node index
-    
+
