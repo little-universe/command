@@ -14,4 +14,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - run: sh ./scripts/
+    - run: sh ./scripts/hello.sh
