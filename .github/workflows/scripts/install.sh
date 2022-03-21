@@ -6,5 +6,3 @@ npm ci
 rm .npmrc
 echo "End execution"
 
-# 
-
