@@ -1,0 +1,17 @@
+#  npm publish --access publi
+
+# Basic workflow to get started with Github Actions
+# ${{github.workflow}}
+name: Running Jest Suite
+#Controls when the workflow will run
+
+on: push
+# Workflows are made of 1 or Many Jobs
+# They can also be in parallel
+jobs:
+  job1:
+    name: Jest Testing
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: sh ./scripts/
