@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - run: sh ./.github/workflows/scripts/hello.sh
+    - run: sh ./.github/workflows/scripts/install.sh
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    - run: node index
+    
