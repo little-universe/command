@@ -1,0 +1,12 @@
+name: Running Jest Suite
+on: push
+jobs:
+  jest:
+    name: Jest Testing
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Node dependencies
+      run: npm ci
+    - name: Run Jest tests
+      run: npm run jest
