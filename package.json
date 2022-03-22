@@ -4,7 +4,7 @@
   "description": "Command pattern implementation for node",
   "main": "index.js",
   "scripts": {
-    "test": "npm run test"
+    "jest": "jest"
   },
   "repository": {
     "type": "git",
@@ -19,5 +19,8 @@
     "@little-universe/do-not-allow-missing-properties": "github:little-universe/do-not-allow-missing-properties",
     "lodash": "^4.17.21"
   },
-  "homepage": "https://github.com/little-universe/command#readme"
+  "homepage": "https://github.com/little-universe/command#readme",
+  "devDependencies": {
+    "jest": "^27.5.1"
+  }
 }
