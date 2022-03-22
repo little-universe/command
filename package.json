@@ -1,8 +1,5 @@
 {
-  "dependencies": {
-    "lodash": "^4.17.21"
-  },
-  "name": "command",
+  "name": "@little-universe/command",
   "version": "1.0.0",
   "description": "Command pattern implementation for node",
   "main": "index.js",
@@ -18,6 +15,9 @@
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/little-universe/command/issues"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
   },
   "homepage": "https://github.com/little-universe/command#readme"
 }
