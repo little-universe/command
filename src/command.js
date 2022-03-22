@@ -1,5 +1,5 @@
 const { isEmpty, isObject, isArray, isString, reduce, map, isNull, isUndefined, isNaN, cloneDeep } = require('lodash')
-const { doNotAllowMissingProperties, allowMissingProperties } = require('./doNotAllowMissingProperties')
+const { doNotAllowMissingProperties, allowMissingProperties } = require('@little-universe/do-not-allow-missing-properties')
 
 const HaltExecution = {}
 

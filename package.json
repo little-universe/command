@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Command pattern implementation for node",
   "main": "index.js",
-  "devDependencies": {},
   "scripts": {
     "test": "npm run test"
   },
@@ -17,6 +16,7 @@
     "url": "https://github.com/little-universe/command/issues"
   },
   "dependencies": {
+    "@little-universe/do-not-allow-missing-properties": "github:little-universe/do-not-allow-missing-properties",
     "lodash": "^4.17.21"
   },
   "homepage": "https://github.com/little-universe/command#readme"
