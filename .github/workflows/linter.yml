@@ -1,0 +1,14 @@
+
+name: Run Linters
+
+on: push
+jobs:
+  linter:
+    name: Running Linters
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Node dependencies
+      run: npm ci
+    - name: Run the standard linter
+      run: npm run linter:standard
