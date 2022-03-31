@@ -43,7 +43,7 @@ const Command = class {
     try {
       this._started = true
 
-      this.validateInputs()
+      await this.validateInputs()
       this.applyDefaultInputs()
       await this._validate()
       const result = await this.execute()
@@ -98,11 +98,11 @@ const Command = class {
   addUnknownError (message) { return this._outcome.addUnknownError(message) }
   setResult (result) { return this._outcome.setResult(result) }
 
-  validateInputs () {
+  async validateInputs () {
     this.validateSupportedInputs()
     this.validateBlankInputs()
     this.validateRequiredInputs()
-    this.validateEnums()
+    await this.validateEnums()
     // TODO: implement validateTypes()
 
     this.haltIfHasErrors()
@@ -154,13 +154,16 @@ const Command = class {
     }
   }
 
-  validateEnums () {
+  async validateEnums () {
     for (const inputName in this.schema) {
       const inputSchema = this.schema[inputName]
       const type = inputSchema.type
 
       if (type === 'enum' && inputName in this.inputs) {
-        const oneOf = Object.values(inputSchema.oneOf)
+        let oneOf = await inputSchema.oneOf
+        if (!isArray(oneOf)) {
+          oneOf = Object.values(oneOf)
+        }
         const value = this.inputs[inputName]
 
         if (value !== undefined && !oneOf.includes(value)) {
