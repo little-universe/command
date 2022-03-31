@@ -175,7 +175,7 @@ const Command = class {
   }
 
   async runSubCommand (CommandClass, inputs, assertSuccess = true) {
-    const command = new CommandClass(inputs)
+    const command = CommandClass.create(inputs)
     const outcome = await command.run()
 
     if (!outcome.success) {
