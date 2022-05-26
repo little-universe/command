@@ -1,4 +1,4 @@
-const { isEmpty, isObject, isArray, isString, reduce, map, isNull, isUndefined, isNaN, cloneDeep } = require('lodash')
+const { isEmpty, isObject, isArray, isString, reduce, map, isNull, isUndefined, isNaN, clone } = require('lodash')
 const { doNotAllowMissingProperties, allowMissingProperties } = require('@little-universe/do-not-allow-missing-properties')
 
 const HaltExecution = {}
@@ -17,7 +17,9 @@ const Command = class {
 
   constructor (inputs = {}) {
     this._rawInputs = inputs
-    this.inputs = doNotAllowMissingProperties(cloneDeep(inputs))
+    // maybe add a mutable property to the schema that defaults to false
+    // and cloneDeep objects that are not mutable
+    this.inputs = doNotAllowMissingProperties(clone(inputs))
     this._started = false
     this._completed = false
     this._outcome = Outcome.create()
