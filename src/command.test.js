@@ -2,22 +2,22 @@
 const { describe, it, expect, beforeEach } = require('@jest/globals')
 const { jest: { clearAllMocks, spyOn } } = require('@jest/globals')
 
-const { Command } = require('./command')
+const { Command, CommandWithNonStaticSchemaError } = require('./command')
 
 describe('Command', () => {
   beforeEach(() => { clearAllMocks() })
 
-  describe('with empty schema', () => {
+  describe('with empty static schema', () => {
     describe('explicit version', () => {
       describe('static run', () => {
         class TestCommand extends Command {
-          schema = {}
+          static schema = {}
 
           execute () {
             return 'We made it!'
           }
         }
-        it.only('executes successfully', async () => {
+        it('executes successfully', async () => {
           const outcome = await TestCommand.run()
           expect(outcome.success).toBe(true)
           expect(outcome.result).toBe('We made it!')
@@ -32,7 +32,8 @@ describe('Command', () => {
             return 'We made it!'
           }
         }
-        it.only('executes successfully', async () => {
+
+        it('executes successfully', async () => {
           const outcome = await TestCommand.run()
           expect(outcome.success).toBe(true)
           expect(outcome.result).toBe('We made it!')
@@ -41,10 +42,41 @@ describe('Command', () => {
     })
   })
 
+  describe('with non-static schema', () => {
+    describe('and empty object schema', () => {
+      class TestCommand extends Command {
+        schema = {}
+      }
+
+      it('should fail', async () => {
+        expect(async () => await TestCommand.run()).rejects.toThrow(CommandWithNonStaticSchemaError)
+      })
+    })
+
+    describe('and null schema', () => {
+      class TestCommand extends Command {
+        schema = null
+      }
+
+      it('should fail', async () => {
+        expect(async () => await TestCommand.run()).rejects.toThrow(CommandWithNonStaticSchemaError)
+      })
+    })
+
+    describe('and non-empty schema', () => {
+      class TestCommand extends Command {
+        schema = { input1: { type: 'string', default: 'default input1 value', required: true } }
+      }
+
+      it('should fail', async () => {
+        expect(async () => await TestCommand.run()).rejects.toThrow(CommandWithNonStaticSchemaError)
+      })
+    })
+  })
+
   describe('command with inputs', () => {
     class TestCommand extends Command {
-      // TODO: This will be static later, will be addressed in other PR.
-      schema =
+      static schema =
         {
           input1: { type: 'string', required: true },
           input2: { type: 'string', default: 'default input2' }

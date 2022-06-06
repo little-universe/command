@@ -3,6 +3,8 @@ const { doNotAllowMissingProperties, allowMissingProperties } = require('@little
 
 const HaltExecution = {}
 
+class CommandWithNonStaticSchemaError extends Error { }
+
 const Command = class {
   inputs
   get success () { return this.outcome.success }
@@ -27,11 +29,29 @@ const Command = class {
 
   static create (rawInputs) {
     const command = doNotAllowMissingProperties(new this(rawInputs))
+    this._sanitizeCreation(command)
     this._validateCreation(command)
+
     return command
   }
 
+  // If there are extra validations, put them here.
   static _validateCreation (newlyCreatedCommandInstance) {
+    this.validateThatSchemaMustBeStatic(newlyCreatedCommandInstance)
+  }
+
+  // If there are extra sanitization processes, put them here.
+  static _sanitizeCreation (newlyCreatedCommandInstance) {
+    this._sanitizeEmptySchema(newlyCreatedCommandInstance)
+  }
+
+  static validateThatSchemaMustBeStatic (newlyCreatedCommandInstance) {
+    if (newlyCreatedCommandInstance._staticSchemaAttributeWasOverwritten) {
+      throw new CommandWithNonStaticSchemaError('Schema must be a static property -- not an instance property.')
+    }
+  }
+
+  static _sanitizeEmptySchema (newlyCreatedCommandInstance) {
     if (isNull(newlyCreatedCommandInstance.schema) || isUndefined(newlyCreatedCommandInstance.schema)) {
       newlyCreatedCommandInstance.constructor.schema = {}
     }
@@ -45,6 +65,10 @@ const Command = class {
   static runAndAssertSuccess (rawInputs) {
     const command = this.create(rawInputs)
     return command.runAndAssertSuccess()
+  }
+
+  get _staticSchemaAttributeWasOverwritten () {
+    return this.schema !== this.constructor.schema
   }
 
   async run () {
@@ -333,5 +357,6 @@ const isBlank = (value) => {
 }
 
 module.exports = {
-  Command
+  Command,
+  CommandWithNonStaticSchemaError
 }
