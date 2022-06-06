@@ -7,24 +7,36 @@ const { Command } = require('./command')
 describe('Command', () => {
   beforeEach(() => { clearAllMocks() })
 
-  describe('empty command', () => {
-    class TestCommand extends Command {
-      // TODO: This will be static later, will be addressed in other PR.
-      schema =
-        {
+  describe('with empty schema', () => {
+    describe('explicit version', () => {
+      describe('static run', () => {
+        class TestCommand extends Command {
+          schema = {}
 
+          execute () {
+            return 'We made it!'
+          }
         }
+        it.only('executes successfully', async () => {
+          const outcome = await TestCommand.run()
+          expect(outcome.success).toBe(true)
+          expect(outcome.result).toBe('We made it!')
+        })
+      })
+    })
 
-      execute () {
-        return 'Result!'
-      }
-    }
-
-    describe('run', () => {
-      it('Is successful', async () => {
-        const outcome = await TestCommand.run()
-        expect(outcome.success).toBe(true)
-        expect(outcome.result).toBe('Result!')
+    describe('implicit version', () => {
+      describe('static run', () => {
+        class TestCommand extends Command {
+          execute () {
+            return 'We made it!'
+          }
+        }
+        it.only('executes successfully', async () => {
+          const outcome = await TestCommand.run()
+          expect(outcome.success).toBe(true)
+          expect(outcome.result).toBe('We made it!')
+        })
       })
     })
   })

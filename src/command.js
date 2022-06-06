@@ -26,7 +26,15 @@ const Command = class {
   }
 
   static create (rawInputs) {
-    return doNotAllowMissingProperties(new this(rawInputs))
+    const command = doNotAllowMissingProperties(new this(rawInputs))
+    this._validateCreation(command)
+    return command
+  }
+
+  static _validateCreation (newlyCreatedCommandInstance) {
+    if (isNull(newlyCreatedCommandInstance.schema) || isUndefined(newlyCreatedCommandInstance.schema)) {
+      newlyCreatedCommandInstance.constructor.schema = {}
+    }
   }
 
   static run (rawInputs) {
