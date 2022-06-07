@@ -124,6 +124,11 @@ const Command = class {
   get inputErrors () { return this.outcome.inputErrors }
   get hasErrors () { return this._outcome.hasErrors }
   addInputError (input, errorKey, message) { return this._outcome.addInputError(input, errorKey, message) }
+  addInputErrorAndHalt (input, errorKey, message) {
+    this.addInputError(input, errorKey, message)
+    this.halt()
+  }
+
   addRuntimeError (errorKey, message) {
     this._outcome.addRuntimeError(errorKey, message)
     this.halt()
