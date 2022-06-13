@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Command pattern implementation for node",
   "main": "index.js",
+  "engines":
+  {
+    "node": "14.15.5"
+  },
   "scripts": {
     "jest": "jest",
     "jest:watch": "jest --watch",
