@@ -6,7 +6,10 @@ const HaltExecution = {}
 class CommandWithNonStaticSchemaError extends Error { }
 
 const Command = class {
+  static schema = {}
+
   inputs
+
   get success () { return this.outcome.success }
   get result () { return this.outcome.result }
   get errors () { return this.outcome.errors }
@@ -29,31 +32,13 @@ const Command = class {
 
   static create (rawInputs) {
     const command = doNotAllowMissingProperties(new this(rawInputs))
-    this._sanitizeCreation(command)
-    this._validateCreation(command)
-
+    command._assertSchemaIsStatic()
     return command
   }
 
-  // If there are extra validations, put them here.
-  static _validateCreation (newlyCreatedCommandInstance) {
-    this.validateThatSchemaMustBeStatic(newlyCreatedCommandInstance)
-  }
-
-  // If there are extra sanitization processes, put them here.
-  static _sanitizeCreation (newlyCreatedCommandInstance) {
-    this._sanitizeEmptySchema(newlyCreatedCommandInstance)
-  }
-
-  static validateThatSchemaMustBeStatic (newlyCreatedCommandInstance) {
-    if (newlyCreatedCommandInstance._staticSchemaAttributeWasOverwritten) {
+  _assertSchemaIsStatic () {
+    if (this._staticSchemaAttributeWasOverwritten) {
       throw new CommandWithNonStaticSchemaError('Schema must be a static property -- not an instance property.')
-    }
-  }
-
-  static _sanitizeEmptySchema (newlyCreatedCommandInstance) {
-    if (isNull(newlyCreatedCommandInstance.schema) || isUndefined(newlyCreatedCommandInstance.schema)) {
-      newlyCreatedCommandInstance.constructor.schema = {}
     }
   }
 
