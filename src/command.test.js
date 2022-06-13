@@ -116,6 +116,45 @@ describe('Command', () => {
           expect(outcome.errors.input1[0][0]).toEqual('invalid')
         })
       })
+      describe('.addInputErrorAndHalt()', () => {
+        class InputHaltCommand extends Command {
+          static schema =
+          {
+            coolestInput: { type: 'string' }
+          }
+
+          execute () {
+            this.operation1()
+            this.operation2()
+            this.operation3()
+          }
+
+          operation1 () {
+            return 'operation 1 success'
+          }
+
+          operation2 () {
+            this.addInputErrorAndHalt('coolestInput', 'missing', 'coolestInput is missing')
+          }
+
+          operation3 () {
+            return "if you see this, then this test doesn't work"
+          }
+        }
+        beforeEach(() => {
+          spyOn(InputHaltCommand.prototype, 'operation1')
+          spyOn(InputHaltCommand.prototype, 'operation2')
+          spyOn(InputHaltCommand.prototype, 'operation3')
+        })
+
+        it('should halt execution', async () => {
+          const outcome = await InputHaltCommand.run()
+          expect(outcome.success).toBe(false)
+          expect(InputHaltCommand.prototype.operation1).toHaveBeenCalled()
+          expect(InputHaltCommand.prototype.operation2).toHaveBeenCalled()
+          expect(InputHaltCommand.prototype.operation3).not.toHaveBeenCalled()
+        })
+      })
       describe('runtime error', () => {
         class AnotherTestCommand extends TestCommand {
           execute () {
