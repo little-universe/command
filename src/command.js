@@ -1,4 +1,4 @@
-const { isEmpty, isObject, isArray, isString, reduce, map, isNull, isUndefined, isNaN, clone } = require('lodash')
+const { isEmpty, isPlainObject, isArray, isString, reduce, map, isNull, isUndefined, isNaN, clone } = require('lodash')
 const { doNotAllowMissingProperties, allowMissingProperties } = require('@little-universe/do-not-allow-missing-properties')
 
 const HaltExecution = {}
@@ -340,7 +340,7 @@ const Outcome = class {
 
 const isBlankString = (value) => isString(value) && !!value.match(/^\s*$/) // no \A or \z in JavaScript??
 const isEmptyArray = (value) => isArray(value) && isEmpty(value)
-const isEmptyObject = (value) => isObject(value) && isEmpty(value)
+const isEmptyObject = (value) => isPlainObject(value) && isEmpty(value)
 
 const isBlank = (value) => {
   return isNull(value) || isUndefined(value) || isBlankString(value) || isEmptyArray(value) || isEmptyObject(value) || isNaN(value)

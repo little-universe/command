@@ -230,4 +230,27 @@ describe('Command', () => {
       })
     })
   })
+
+  describe('with required Date inputs', () => {
+    class TestCommand extends Command {
+      static schema = {
+        input1: { type: 'date', required: true }
+      }
+
+      execute () {
+        return this.inputs.input1
+      }
+    }
+
+    describe('run', () => {
+      it('Is successful', async () => {
+        const now = new Date()
+
+        const outcome = await TestCommand.run({ input1: now })
+
+        expect(outcome.success).toBe(true)
+        expect(outcome.result).toBe(now)
+      })
+    })
+  })
 })
