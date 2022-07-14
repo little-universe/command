@@ -119,9 +119,9 @@ describe('Command', () => {
       describe('.addInputErrorAndHalt()', () => {
         class InputHaltCommand extends Command {
           static schema =
-          {
-            coolestInput: { type: 'string' }
-          }
+            {
+              coolestInput: { type: 'string' }
+            }
 
           execute () {
             this.operation1()
@@ -250,6 +250,31 @@ describe('Command', () => {
 
         expect(outcome.success).toBe(true)
         expect(outcome.result).toBe(now)
+      })
+    })
+  })
+
+  describe('static description attribute', () => {
+    describe('explicit description assignment', () => {
+      const commandDescription = 'The coolest of all commands.'
+      class CommandWithDescription extends Command {
+        static description = commandDescription
+      }
+
+      it('is successful', async () => {
+        const commandInstance = new CommandWithDescription()
+        expect(CommandWithDescription.description).toBe(commandDescription)
+        expect(commandInstance.description).toBe(commandDescription)
+      })
+    })
+
+    describe('implicit description assignment', () => {
+      class CommandWithEmptyDescription extends Command { }
+
+      it('is successful', async () => {
+        const commandInstance = new CommandWithEmptyDescription()
+        expect(CommandWithEmptyDescription.description).toBe('')
+        expect(commandInstance.description).toBe('')
       })
     })
   })

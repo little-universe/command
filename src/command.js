@@ -7,6 +7,7 @@ class CommandWithNonStaticSchemaError extends Error { }
 
 const Command = class {
   static schema = {}
+  static description = ''
 
   inputs
 
@@ -14,6 +15,7 @@ const Command = class {
   get result () { return this.outcome.result }
   get errors () { return this.outcome.errors }
   get schema () { return this.constructor.schema }
+  get description () { return this.constructor.description }
 
   _rawInputs
   _outcome
