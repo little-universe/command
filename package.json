@@ -5,8 +5,8 @@
   "main": "index.js",
   "engines":
   {
-    "node": "16.15.1",
-    "npm": "8.16.0"
+    "node": "18.14.2",
+    "npm": "9.5.1"
   },
   "scripts": {
     "jest": "jest",
