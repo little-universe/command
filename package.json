@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "description": "Command pattern implementation for node",
   "main": "index.js",
-  "engines":
-  {
-    "node": "18.14.2",
-    "npm": "9.5.1"
+  "engines": {
+    "node": "18.19.0",
+    "npm": "10.2.5"
   },
   "scripts": {
     "jest": "jest",
