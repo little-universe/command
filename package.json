@@ -4,8 +4,8 @@
   "description": "Command pattern implementation for node",
   "main": "index.js",
   "engines": {
-    "node": ">=18.19.0",
-    "npm": ">11.0.0"
+    "node": ">=20.17.0",
+    "npm": ">=11.0.0"
   },
   "scripts": {
     "jest": "jest",
